@@ -15,4 +15,6 @@
     <string name="hint_username">Enter a new username</string>
     <string name="hint_email_reset">Enter your email</string>
     <string name="enter_group_name">Enter group name</string>
+    <string name="action_search">Search Property</string>
+    <string name="property_name">Property Name</string>
 </resources>

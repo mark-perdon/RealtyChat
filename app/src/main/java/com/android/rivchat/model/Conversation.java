@@ -3,10 +3,10 @@ package com.android.rivchat.model;
 import java.util.ArrayList;
 
 
-
-public class Consersation {
+public class Conversation {
     private ArrayList<Message> listMessageData;
-    public Consersation(){
+
+    public Conversation() {
         listMessageData = new ArrayList<>();
     }
 
