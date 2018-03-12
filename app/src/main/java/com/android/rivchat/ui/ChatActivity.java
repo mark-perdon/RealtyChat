@@ -12,7 +12,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Base64;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,7 +22,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.rivchat.data.SharedPreferenceHelper;
+import com.android.rivchat.data.StaticConfig;
+import com.android.rivchat.model.Conversation;
+import com.android.rivchat.model.Message;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,18 +35,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.myrealtymlplite.androiddatabase.R;
-import com.android.rivchat.data.SharedPreferenceHelper;
-import com.android.rivchat.data.StaticConfig;
-import com.android.rivchat.model.Conversation;
-import com.android.rivchat.model.Message;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -131,6 +130,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -142,9 +142,11 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         return true;
     }
 
+
     @Override
     public boolean onQueryTextChange(String query) {
 
+        Toast.makeText(getApplicationContext(), "Typing...", Toast.LENGTH_SHORT).show();
         return true;
     }
 
@@ -153,15 +155,16 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         return false;
     }
 
-    public void launchCreateActivity(View view){
-        Log.i(TAG,"launching createListingActivity");
-        Intent intent = new Intent(this,ListingsActivity.class);
+    public void launchCreateActivity(View view) {
+        Log.i(TAG, "launching createListingActivity");
+        Intent intent = new Intent(this, ListingsActivity.class);
         intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, roomId);
         startActivity(intent);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == android.R.id.home){
+        if (item.getItemId() == android.R.id.home) {
             Intent result = new Intent();
             result.putExtra("idFriend", idFriend.get(0));
             setResult(RESULT_OK, result);
@@ -190,8 +193,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 newMessage.idReceiver = roomId;
                 newMessage.timestamp = System.currentTimeMillis();
                 FirebaseDatabase.getInstance().getReference().child("message/" + roomId).push().setValue(newMessage);
-                try  {
-                    InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+                try {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                 } catch (Exception e) {
 
@@ -208,8 +211,12 @@ class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private HashMap<String, Bitmap> bitmapAvata;
     private HashMap<String, DatabaseReference> bitmapAvataDB;
     private Bitmap bitmapAvataUser;
+    private Comparator<Conversation> comparator;
 
-    public ListMessageAdapter(Context context, Conversation conversation, HashMap<String, Bitmap> bitmapAvata, Bitmap bitmapAvataUser) {
+    public ListMessageAdapter(Context context,
+                              Conversation conversation,
+                              HashMap<String, Bitmap> bitmapAvata,
+                              Bitmap bitmapAvataUser) {
         this.context = context;
         this.conversation = conversation;
         this.bitmapAvata = bitmapAvata;
@@ -238,17 +245,17 @@ class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 ((ItemMessageFriendHolder) holder).avata.setImageBitmap(currentAvata);
             } else {
                 final String id = conversation.getListMessageData().get(position).idSender;
-                if(bitmapAvataDB.get(id) == null){
+                if (bitmapAvataDB.get(id) == null) {
                     bitmapAvataDB.put(id, FirebaseDatabase.getInstance().getReference().child("user/" + id + "/avata"));
                     bitmapAvataDB.get(id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.getValue() != null) {
                                 String avataStr = (String) dataSnapshot.getValue();
-                                if(!avataStr.equals(StaticConfig.STR_DEFAULT_BASE64)) {
+                                if (!avataStr.equals(StaticConfig.STR_DEFAULT_BASE64)) {
                                     byte[] decodedString = Base64.decode(avataStr, Base64.DEFAULT);
                                     ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
-                                }else{
+                                } else {
                                     ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
                                 }
                                 notifyDataSetChanged();
@@ -288,6 +295,45 @@ class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    private final SortedList.Callback<Conversation> mSortedList = new SortedList.Callback<Conversation>() {
+
+        @Override
+        public void onInserted(int position, int count) {
+
+        }
+
+        @Override
+        public void onRemoved(int position, int count) {
+
+        }
+
+        @Override
+        public void onMoved(int fromPosition, int toPosition) {
+
+        }
+
+        @Override
+        public int compare(Conversation a, Conversation b) {
+            return comparator.compare(a, b);
+        }
+
+        @Override
+        public void onChanged(int position, int count) {
+
+        }
+
+        @Override
+        public boolean areContentsTheSame(Conversation oldItem, Conversation newItem) {
+            return false;
+        }
+
+        @Override
+        public boolean areItemsTheSame(Conversation item1, Conversation item2) {
+            return false;
+        }
+    };
+    public void add(Conversation model){
+    }
     @Override
     public int getItemViewType(int position) {
         return conversation.getListMessageData().get(position).idSender.equals(StaticConfig.UID) ? ChatActivity.VIEW_TYPE_USER_MESSAGE : ChatActivity.VIEW_TYPE_FRIEND_MESSAGE;

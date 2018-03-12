@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.myrealtymlplite.androiddatabase">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
@@ -17,7 +17,7 @@
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name="com.android.rivchat.ui.LoginActivity"
             android:launchMode="singleTop"
@@ -36,18 +36,20 @@
             android:theme="@style/Translucent" />
         <activity
             android:name="com.android.rivchat.ui.ChatActivity"
+            android:parentActivityName="com.android.rivchat.MainActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden"
-            android:parentActivityName="com.android.rivchat.MainActivity"/>
-        <activity android:name="com.android.rivchat.ui.AddGroupActivity"
-            android:theme="@style/MyThemeNoActionbar"/>
-        <activity android:name="com.android.rivchat.ui.ListingsActivity"
-            android:windowSoftInputMode="stateHidden"
-            />
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name="com.android.rivchat.ui.AddGroupActivity"
+            android:theme="@style/MyThemeNoActionbar" />
+        <activity
+            android:name="com.android.rivchat.ui.ListingsActivity"
+            android:windowSoftInputMode="stateHidden" />
 
-        <service android:name="com.android.rivchat.service.FriendChatService"
+        <service
+            android:name="com.android.rivchat.service.FriendChatService"
             android:exported="false"
-            android:persistent= "true" />
+            android:persistent="true" />
     </application>
 
 </manifest>
